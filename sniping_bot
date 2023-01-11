@@ -1,0 +1,179 @@
+import json
+import requests
+from selenium.webdriver.common.keys import Keys
+from seleniumwire import webdriver
+# from selenium import webdriver
+import time
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from bs4 import BeautifulSoup
+
+
+def await_element(driver, by, value):
+    return WebDriverWait(driver, 20).until(EC.presence_of_element_located((by, value)))
+
+
+def get_items(url):
+    r = requests.get(url)
+    soup = BeautifulSoup(r.text, 'lxml')
+    lis = soup.find('ul', {'id': 'SOME ID'}).find_all('li')
+    result = []
+    for li in lis:
+        info = li.find('TAG', {'CSS SELECTOR': 'SMTH'})
+        sku = info['SMTHING']
+        result.append(sku)
+    return result
+
+
+def get_category(url):
+    r = requests.get(url)
+    soup = BeautifulSoup(r.text, 'lxml')
+    return soup.find('div', {'id': 'SOME ID'})['SOME ID']
+
+
+def check(skus=None, category="62"):
+    get_url = 'AN API'
+    products = [{"sku": sku, "type": "SOME ID"} for sku in skus]
+    get_payload = {
+        "products": str(products),
+        "categoryId": category
+    }
+    r = requests.post(get_url, data=get_payload)
+    # print(r, r.text)
+    items = r.json()['data']
+    for item in items:
+        print(item)
+        if item['IsItemAvailableForPurchase']:
+            return item['PublishProductId']
+    return None
+
+
+def add(product_id, cookie):
+    url = f'AN API I FOUND'
+    headers = {
+        'cookie': cookie,
+    }
+    r = requests.get(url, headers=headers)
+    print(r)
+    print(r.text)
+
+
+def set_address(driver, address):
+    await_element(driver, By.ID, 'SOME ID').send_keys(Keys.CONTROL + 'a')
+    await_element(driver, By.ID, 'SOME ID').send_keys(address['address_name'])
+    driver.find_element(By.ID, 'SOME ID').send_keys(Keys.CONTROL + 'a')
+    driver.find_element(By.ID, 'SOME ID').send_keys(address['first_name'])
+    driver.find_element(By.ID, 'SOME ID').send_keys(Keys.CONTROL + 'a')
+    driver.find_element(By.ID, 'SOME ID').send_keys(address['last_name'])
+    driver.find_element(By.ID, 'SOME ID').send_keys(Keys.CONTROL + 'a')
+    driver.find_element(By.ID, 'SOME ID').send_keys(address['street'])
+    driver.find_element(By.ID, 'SOME ID').send_keys(Keys.CONTROL + 'a')
+    driver.find_element(By.ID, 'SOME ID').send_keys(address['phone'])
+    country = driver.find_element(By.ID, 'SOME ID')
+    country.click()
+    country.send_keys(address['country'])
+    country.send_keys(Keys.ENTER)
+    driver.find_element(By.ID, 'SOME ID').send_keys(Keys.CONTROL + 'a')
+    driver.find_element(By.ID, 'SOME ID').send_keys(address['city'])
+    driver.find_element(By.ID, 'SOME ID').send_keys(Keys.CONTROL + 'a')
+    driver.find_element(By.ID, 'SOME ID').send_keys(address['postal_code'])
+    driver.find_element(By.ID, 'SOME ID').click()
+
+
+def set_card(driver, card):
+    await_element(driver, By.ID, 'CardHolderName').send_keys(card['name'])
+    numbers = card['number'].split(' ')
+    for number in numbers:
+        driver.find_element(By.ID, 'CredidCardNumber').send_keys(number)
+    #    driver.find_element(By.ID, 'CredidCardNumber').send_keys(card['number'])
+    driver.find_element(By.ID, 'CredidCardExpMonth').send_keys(card['month'])
+    driver.find_element(By.ID, 'CredidCardExpYear').send_keys(card['year'])
+    driver.find_element(By.ID, 'CredidCardCVCNumber').send_keys(card['cvv'])
+    if card['mastercard']:
+        driver.find_element(By.ID, 'SOME ID').click()
+
+
+with open('A FILE', 'r') as f:
+    r = json.load(f)
+card = r['card']
+wish_url = r['url']
+category = get_category(wish_url)
+shipping_address = r['shipping address']
+billing_address = r['billing address']
+chrome_stuff = r['chrome_stuff']
+options = webdriver.ChromeOptions()
+# options.add_argument(r"--user-data-dir=C:\Users\Dell\AppData\Local\Google\Chrome\User Data")
+# options.add_argument(r"--user-data-dir=/home/demo/.config/google-chrome/")
+options.add_argument(r"--user-data-dir=" + chrome_stuff['chrome user data dir'])
+#
+#
+#CHANGE TESTING STUFFFFFFFFFFFFFF
+options.add_argument(r'--profile-directory=Profile 5')
+options.add_argument("user-agent=SOME USER AGENT")
+#
+#
+# options.add_argument(r"--user-data-dir=" + os.path.join(os.getcwd(), 'browser-data'))
+driver = webdriver.Chrome(options=options)
+time.sleep(1)
+driver.get('A URL')
+#
+#
+input()
+#
+#
+time.sleep(4)
+
+for request in driver.requests:
+    elems = request.url.split('/')
+    for elem in elems:
+        if elem == 'SOME ELEMENT':
+            cookie = request.headers['cookie']
+            print('lol')
+driver.get('ANOTHER URL')
+
+#edit_shipping = await_element(driver, By.XPATH, '//*[@title="SOME TITLE"]')
+#edit_shipping.click()
+#set_address(driver, shipping_address)
+#time.sleep(2)
+#
+#
+#driver.get('DASHBOARD URL')
+#await_element(driver, By.XPATH, '//*[@title="SOME TITLE"]')
+#driver.find_elements(By.XPATH, '//*[@title="SOME TITLE"]')[1].click()
+#set_address(driver, billing_address)
+#
+#
+time.sleep(2)
+skus = get_items(wish_url)
+loops = 0
+while True:
+    loops += 1
+    print(loops)
+    if loops % 23 == 0:
+        driver.refresh()
+        skus = get_items(wish_url)
+        loops = 0
+    buy_id = check(skus, category)
+    print(buy_id)
+    if buy_id:
+        add(buy_id, cookie)
+        break
+driver.get('CHECKOUT URL')
+print('buyin time')
+
+input()
+
+
+while True:
+    try:
+        set_card(driver, card)
+        break
+    except:
+        time.sleep(0.1)
+driver.find_element(By.XPATH, '//*[@for="checkoutTermsAndConditions-Box"]').click()
+driver.find_element(By.XPATH, '//*[@class="captcha-solver"]').click()
+# submit = driver.find_element(By.ID, 'SOME ID')
+# submit.click()
+print('the deed is done')
+input()
