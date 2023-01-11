@@ -1,0 +1,64 @@
+from selenium import webdriver
+from selenium.webdriver.support import expected_conditions as EC
+import time
+import json
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from bs4 import BeautifulSoup
+urls = '''my influencer urls'''
+links = urls.split('\n')
+options = webdriver.ChromeOptions()
+options.add_argument(r"--user-data-dir=C:\Users\Dell\AppData\Local\Google\Chrome\User Data")
+options.add_argument(r'--profile-directory=Profile 1')
+driver = webdriver.Chrome(options=options)
+
+
+def await_element(driver, by, value):
+    return WebDriverWait(driver, 10).until(EC.presence_of_element_located((by, value)))
+
+
+def get_tags(description):
+    result = []
+    try:
+        for taggy in description.split('#')[1:]:
+            result.append(f"#{taggy.split(' ')[0]}")
+    except IndexError:
+        return []
+    return result
+
+
+def analyse_tags():
+    result = {}
+    for link in links:
+        driver.get(link)
+        time.sleep(4)
+        table = await_element(driver, By.XPATH, '//*[@id="SOME ID"]')
+        html = table.get_attribute('innerHTML')
+        soup = BeautifulSoup(html, 'lxml')
+        all_a = soup.find_all('a', {'id': "SOME ID"})
+        duo = [all_a[0]['href'], all_a[1]['href']]
+        for vid_url in duo:
+            driver.get(vid_url)
+            descript = await_element(driver, By.XPATH, '//*[@id="SOME ID"]').text
+            tags = get_tags(descript)
+            #
+            print(tags)
+            #
+            for tag in tags:
+                if tag not in result:
+                    result[tag] = 1
+                else:
+                    result[tag] += 1
+    with open('tags.json', 'w', encoding='utf8') as f:
+        json.dump(result, f, ensure_ascii=False)
+    maxim = 0
+    start_maxim = 0
+    for tag in result:
+        maxim = max(maxim, result[tag])
+        if maxim > start_maxim:
+            print(maxim)
+        start_maxim = maxim
+    return 0
+
+
+analyse_tags()
