@@ -1,0 +1,100 @@
+from selenium import webdriver
+from selenium.webdriver.support import expected_conditions as EC
+import time
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from bs4 import BeautifulSoup
+import random
+
+
+def generate_comments(texts):
+    random.shuffle(texts)
+    loops = 0
+    while True:
+        yield texts[loops % (len(texts))]
+        loops += 1
+
+
+def await_element(driver, by, value):
+    return WebDriverWait(driver, 10).until(EC.presence_of_element_located((by, value)))
+
+
+def get_tags(description):
+    result = []
+    try:
+        for taggy in description.split('#')[1:]:
+            result.append(f"#{taggy.split(' ')[0]}")
+    except IndexError:
+        return []
+    return result
+
+
+humor_comments = generate_comments(["wow you're so funny", "Your sense of humor is amasing!", etc. etc.])
+new_year_comments = generate_comments([SOME COMMENTS])
+# and so on with other sets of comments, i'll just erase my stuff
+beauty_comments = generate_comments(])
+relationship_comments = generate_comments([
+lipsync_comments = generate_comments([
+education_comments = generate_comments([
+walk_comments = generate_comments([
+makeup_comments = generate_comments([
+iphone_comments = generate_comments([
+anime_comments = generate_comments([
+dance_comments = generate_comments([
+morph_comments = generate_comments([
+quote_comments = generate_comments(
+tutorial_comments = generate_comments([
+music_comments = generate_comments(
+animal_comments = generate_comments(
+illusion_comments = generate_comments([
+art_comments = generate_comments([
+english_comments = generate_comments([
+urls = '''
+INFLUENCER URLS'''
+links = urls.split('\n')
+options = webdriver.ChromeOptions()
+# to keep logged in
+options.add_argument(r"--user-data-dir=C:\Users\Dell\AppData\Local\Google\Chrome\User Data")
+options.add_argument(r'--profile-directory=Profile 1')
+driver = webdriver.Chrome(options=options)
+for link in links:
+    try:
+        driver.get(link)
+        time.sleep(4)
+        table = await_element(driver, By.XPATH, '//*[@id="SOME ID"]')
+        html = table.get_attribute('innerHTML')
+        soup = BeautifulSoup(html, 'lxml')
+        all_a = soup.find_all('a', {'data-cy': "SOME ID"})
+        duo = [all_a[0]['href'], all_a[1]['href']]
+        for vid_url in duo:
+            driver.get(vid_url)
+            error = 1
+            descript = await_element(driver, By.XPATH, '//*[@id="SOME ID"]').text
+            message = None
+            tags = get_tags(descript)
+            if len(tags) == 0:
+                print('no tags bruh: ', link)
+            else:
+                for tag in tags:
+                    match tag:
+                        case '#humor' | "#comedy" | "#fun":
+                            message = next(humor_comments)
+                        case '#newyear' | "#mynewyear":
+                            message = next(new_year_comments)
+                        case '#education' | '#facts':
+                            message = next(education_comments)
+                         # and so on and so on...
+                        case
+                        case
+                        case
+                        ......
+                if message:
+                    text = driver.find_element(By.XPATH, '//*[@id="SOME ID"]')
+                    text.send_keys(message)
+                    driver.find_element(By.XPATH, '//*[@id="submit"]').click()
+                else:
+                    print('no comment here: ', link)
+                time.sleep(1)
+    except:
+        print(link)
+        time.sleep(1)
