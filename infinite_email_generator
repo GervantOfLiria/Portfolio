@@ -1,0 +1,108 @@
+from selenium import webdriver
+import random
+from selenium.webdriver.common.alert import Alert
+import time
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.keys import Keys
+options = webdriver.ChromeOptions()
+options.add_argument("window-size=1366x768")
+options.add_extension('captcha_ext.crx')
+signup_url = 'EMAIL URL'
+file_path = 'emails.txt'
+names = ['james', 'mary', 'robert', 'patricia', 'john', 'jennifer', 'michael', 'linda', 'david', 'elizabeth', 'william',
+         'barbara', 'richard', 'susan', 'joseph', 'jessica', 'thomas', 'sarah', 'charles', 'karen', 'christopher',
+         'lisa', 'daniel', 'nancy', 'matthew', 'betty', 'anthony', 'margaret', 'mark', 'sandra', 'donald', 'ashley',
+         'steven', 'kimberly', 'paul', 'emily', 'andrew', 'donna', 'joshua', 'michelle', 'kenneth', 'carol', 'kevin',
+         'amanda', 'brian', 'dorothy', 'george', 'melissa', 'timothy', 'deborah', 'ronald', 'stephanie', 'edward',
+         'rebecca', 'jason', 'sharon', 'jeffrey', 'laura', 'ryan', 'cynthia', 'jacob', 'kathleen', 'gary', 'amy',
+         'nicholas', 'angela', 'eric', 'shirley', 'jonathan', 'anna', 'stephen', 'brenda', 'larry', 'pamela', 'justin',
+         'emma', 'scott', 'nicole', 'brandon', 'helen', 'benjamin', 'samantha', 'samuel', 'katherine', 'gregory',
+         'christine', 'alexander', 'debra', 'frank', 'rachel', 'patrick', 'carolyn', 'raymond', 'janet', 'jack',
+         'catherine', 'dennis', 'maria', 'jerry', 'heather', 'tyler', 'diane', 'aaron', 'ruth', 'jose', 'julie', 'adam',
+         'olivia', 'nathan', 'joyce', 'henry', 'virginia', 'douglas', 'victoria', 'zachary', 'kelly', 'peter', 'lauren',
+         'kyle', 'christina', 'ethan', 'joan', 'walter', 'evelyn', 'noah', 'judith', 'jeremy', 'megan', 'christian',
+         'andrea', 'keith', 'cheryl', 'roger', 'hannah', 'terry', 'jacqueline', 'gerald', 'martha', 'harold', 'gloria',
+         'sean', 'teresa', 'austin', 'ann', 'carl', 'sara', 'arthur', 'madison', 'lawrence', 'frances', 'dylan',
+         'kathryn', 'jesse', 'janice', 'jordan', 'jean', 'bryan', 'abigail', 'billy', 'alice', 'joe', 'julia', 'bruce',
+         'judy', 'gabriel', 'sophia', 'logan', 'grace', 'albert', 'denise', 'willie', 'amber', 'alan', 'doris', 'juan',
+         'marilyn', 'wayne', 'danielle', 'elijah', 'beverly', 'randy', 'isabella', 'roy', 'theresa', 'vincent', 'diana',
+         'ralph', 'natalie', 'eugene', 'brittany', 'russell', 'charlotte', 'bobby', 'marie', 'mason', 'kayla', 'philip',
+         'alexis', 'louis', 'lori']
+last_names = ['baltimore', 'biffle', 'biffle', 'canine', 'chia', 'christianson', 'courtland', 'crownover',
+              'daughenbaugh', 'dimick', 'dollar', 'easterlin', 'easterlin', 'felch', 'felch', 'felch', 'goleman',
+              'goleman', 'governor', 'harjo', 'harkleroad', 'harkrader', 'hipple', 'hipple', 'hipple', 'imler', 'imler',
+              'kinderman', 'kitelinger', 'kitelinger', 'kitelinger', 'klish', 'klish', 'lakin', 'lepley', 'lepley',
+              'malich', 'pershing', 'ridlehoover', 'ridlehoover', 'rodeheaver', 'rodeheaver', 'rodenbaugh', 'sauerbrey',
+              'settlemire', 'settlemire', 'strome', 'thobe', 'thobe', 'vanevery', 'wisener', 'wisener', 'youtz',
+              'youtz', '']
+
+
+def get_name():
+    name = names[random.randint(0, 199)] + str(random.randint(10000, 100000)) + last_names[random.randint(0, 54)] + str(
+        random.randint(1950, 2000))
+    return name
+
+
+def get_password():
+    password = names[random.randint(0, 199)] + str(random.randint(10000, 50000))
+    return password
+
+
+def await_element(driver, by, value):
+    return WebDriverWait(driver, 60).until(EC.presence_of_element_located((by, value)))
+
+
+def create_mail():
+    name = get_name()
+    password = get_password()
+    print(name + '@EMAIL.DOMEN', ' ', password)
+    driver = webdriver.Chrome(options=options)
+    time.sleep(5)
+    if len(driver.window_handles) > 1:
+        for handle in driver.window_handles[:-1]:
+            driver.switch_to.window(handle)
+            driver.close()
+
+    driver.switch_to.window(driver.window_handles[0])
+    driver.get('chrome-extension://SOMEURL to bypasscaptchas')
+    time.sleep(1)
+    driver.find_element(By.XPATH, "//input[@name = 'apiKey']").send_keys('SOME API  KEY')
+    driver.find_element(By.ID, 'connect').click()
+    time.sleep(5)
+    alert = False
+    while not alert:
+        alert = Alert(driver)
+    alert.accept()
+    driver.get(signup_url)
+    time.sleep(10)
+    iframe = driver.find_element(By.ID, 'SOME ID')
+    driver.switch_to.frame(iframe)
+    email_field = driver.find_element(By.ID, 'email')
+    email_field.send_keys(name)
+    driver.switch_to.default_content()
+    password_field = driver.find_element(By.XPATH, '//*[@id="password"]')
+    repeat_field = driver.find_element(By.XPATH, '//*[@id="repeat-password"]')
+    password_field.send_keys(password)
+    repeat_field.send_keys(password)
+    repeat_field.send_keys(Keys.ENTER)
+    time.sleep(5)
+    print('ok')
+    iframe1 = driver.find_element(By.XPATH, "//iframe[@title='Captcha']")
+    driver.switch_to.frame(iframe1)
+    time.sleep(5)
+    driver.find_element(By.XPATH, "//div[@class = 'captcha-solver-info']").click()
+    time.sleep(5)
+    button = await_element(driver, By.XPATH, "//button[@type = 'submit']")
+    button.click()
+    await_element(driver, By.XPATH, "//*[text() = 'Может быть, позже']").click()
+    time.sleep(5)
+    await_element(driver, By.XPATH, "//*[text() = 'Подтвердить']").click()
+    await_element(driver, By.XPATH, "//button[@data-testid = 'explore-mail']").click()
+    with open(file_path, 'a') as f:
+        f.write(f'\n {name}     {password}')
+    time.sleep(5)
+
+
+create_mail()
